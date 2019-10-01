@@ -15,11 +15,11 @@ class NaverDownloader:
 
     async def queue_downloads(self, url):
         title = urlparse(url).query.split('volumeNo=')[1].split('&')[0]
-        desiredpath = os.getcwd() + '\\' + title + '\\'
+        desiredpath = os.path.join(os.getcwd(), title)
         if not os.path.exists(desiredpath):
             os.makedirs(desiredpath)
         timeout = aiohttp.ClientTimeout(total=60)
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:67.0) Gecko/20100101 Firefox/67.0'}
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:69.0) Gecko/20100101 Firefox/69.0'}
         async with aiohttp.ClientSession(timeout=timeout, headers=headers) as self.session:
             async with self.session.get(url) as response:
                 text = await response.text()
@@ -29,7 +29,7 @@ class NaverDownloader:
                         picture_url = linkdata['src']
                         picture_id = unquote(urlparse(picture_url).path.split('/')[-1])
                         picture_name = re.sub('[<>:\"/|?*]', ' ', picture_id).strip()
-                        picture_path = desiredpath + picture_name
+                        picture_path = os.path.join(desiredpath, picture_name)
                         if not os.path.isfile(picture_path):
                             await self.download(picture_url, picture_path)
                     else:
