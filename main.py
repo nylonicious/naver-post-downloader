@@ -1,7 +1,7 @@
 import asyncio
-import os
 import re
 from json import loads as loadjson
+from pathlib import Path
 from sys import version_info
 from urllib.parse import unquote, urlparse
 
@@ -15,9 +15,9 @@ class NaverDownloader:
 
     async def queue_downloads(self, url):
         title = urlparse(url).query.split('volumeNo=')[1].split('&')[0]
-        desiredpath = os.path.join(os.getcwd(), title)
-        if not os.path.exists(desiredpath):
-            os.makedirs(desiredpath)
+        desiredpath = Path.cwd() / title
+        if not desiredpath.exists():
+            desiredpath.mkdir(parents=True)
         timeout = aiohttp.ClientTimeout(total=60)
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:69.0) Gecko/20100101 Firefox/69.0'}
         async with aiohttp.ClientSession(timeout=timeout, headers=headers) as self.session:
@@ -29,8 +29,8 @@ class NaverDownloader:
                         picture_url = linkdata['src']
                         picture_id = unquote(urlparse(picture_url).path.split('/')[-1])
                         picture_name = re.sub('[<>:\"/|?*]', ' ', picture_id).strip()
-                        picture_path = os.path.join(desiredpath, picture_name)
-                        if not os.path.isfile(picture_path):
+                        picture_path = desiredpath / picture_name
+                        if not desiredpath.is_file():
                             await self.download(picture_url, picture_path)
                     else:
                         print(f"Error string does not include 'src' {linkdata}")
